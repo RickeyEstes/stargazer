@@ -1,0 +1,21 @@
+[
+  {
+    "$match": {
+      "repository_path": "REPO_PATH"
+    }
+  },
+  {
+    "$group": {
+      "_id": null,
+      "count": {
+        "$sum": 1
+      }
+    }
+  },
+  {
+    "$project": {
+      "_id": false,
+      "count": true
+    }
+  }
+]

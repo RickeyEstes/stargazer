@@ -1,0 +1,45 @@
+[
+  {
+    "$match": {
+      "repository_path": "REPO_PATH"
+    }
+  },
+  {
+    "$lookup": {
+      "from": "users",
+      "localField": "data.user.login",
+      "foreignField": "login",
+      "as": "users"
+    }
+  },
+  {
+    "$project": {
+      "data": "$data",
+      "user": {
+        "$arrayElemAt": [
+          "$users",
+          0
+        ]
+      }
+    }
+  },
+  {
+    "$sort": {
+      "user.data.followers": -1
+    }
+  },
+  {
+    "$limit": 25
+  },
+  {
+    "$project": {
+      "starred_at": "$data.starred_at",
+      "login": "$user.data.login",
+      "name": "$user.data.name",
+      "followers": "$user.data.followers",
+      "company": "$user.data.company",
+      "location": "$user.data.location",
+      "html_url": "$user.data.html_url"
+    }
+  }
+]
