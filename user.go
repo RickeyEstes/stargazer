@@ -6,7 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func execUserRoutine(dbClient *databaseClient, ghClient *githubClient, expirationDelay int) error {
+func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
+	expirationDelay, expirationMinFollowers int) error {
 	logrus.Info("user routine: get stargazers from database")
 	ss, err := dbClient.getStargazers()
 	if err != nil {
@@ -22,7 +23,8 @@ func execUserRoutine(dbClient *databaseClient, ghClient *githubClient, expiratio
 		if err != nil {
 			return err
 		}
-		if u == nil || (u.Expire.Before(time.Now()) && expirationDelay > 0) {
+		needSave := u == nil || (u.Expire.Before(time.Now()) && expirationDelay > 0 && int(u.Data["followers"].(float64)) >= expirationMinFollowers)
+		if needSave {
 			logrus.Infof("user routine: get user %s from Github (%d/%d)", login, i+1, len(ss))
 			o, err := ghClient.getUser(login)
 			if err != nil {
@@ -48,8 +50,8 @@ func execUserRoutine(dbClient *databaseClient, ghClient *githubClient, expiratio
 				}
 			}
 
-			logrus.Info("user routine: wait 50ms")
-			time.Sleep(50 * time.Millisecond)
+			logrus.Info("user routine: wait 10ms")
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 

@@ -45,6 +45,10 @@ func main() {
 				Name:  "user-expiration-delay",
 				Usage: "Set expiration delay for users in hours (0 means no expiration).",
 			},
+			cli.IntFlag{
+				Name:  "user-expiration-min-followers",
+				Usage: "Set the min count of followers needed for a user to expire.",
+			},
 		},
 		Action: start,
 	}}
@@ -95,7 +99,8 @@ func start(c *cli.Context) error {
 
 	go func() {
 		for {
-			if err := execUserRoutine(dbClient, ghClient, c.Int("user-expiration-delay")); err != nil {
+			if err := execUserRoutine(dbClient, ghClient, c.Int("user-expiration-delay"),
+				c.Int("user-expiration-min-followers")); err != nil {
 				logrus.Errorf("%+v", err)
 			}
 
