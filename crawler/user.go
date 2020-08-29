@@ -30,20 +30,26 @@ func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
 			if err != nil {
 				return err
 			}
+			os, err := ghClient.getUserOrganizations(login)
+			if err != nil {
+				return err
+			}
 
-			expire := time.Now().Add(time.Hour * time.Duration(expirationDelay))
+			expire := time.Now().Add(time.Second * time.Duration(expirationDelay))
 			if u == nil {
 				logrus.Infof("user routine: insert user %s in database", login)
 				if err := dbClient.insertUser(&user{
-					Expire: expire,
-					Login:  login,
-					Data:   o,
+					Expire:        expire,
+					Login:         login,
+					Data:          o,
+					Organizations: os,
 				}); err != nil {
 					return err
 				}
 			} else {
 				u.Expire = expire
 				u.Data = o
+				u.Organizations = os
 				logrus.Infof("user routine: update user %s in database", login)
 				if err := dbClient.updateUser(u); err != nil {
 					return err

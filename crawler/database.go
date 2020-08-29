@@ -113,13 +113,13 @@ func (c databaseClient) getStargazers() ([]stargazer, error) {
 	return ss, nil
 }
 
-func (c databaseClient) deleteStargazers(repositoryID primitive.ObjectID, page int) error {
+func (c databaseClient) deleteStargazers(repositoryID primitive.ObjectID) error {
 	co := c.db.Collection("stargazers")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := co.DeleteMany(ctx, bson.M{"_repository_id": repositoryID, "page": page})
+	_, err := co.DeleteMany(ctx, bson.M{"_repository_id": repositoryID})
 	return errors.WithStack(err)
 }
 
@@ -175,4 +175,12 @@ func (c databaseClient) updateUser(u *user) error {
 
 	_, err := co.UpdateOne(ctx, bson.M{"_id": u.ID}, bson.M{"$set": u})
 	return errors.WithStack(err)
+}
+
+func (c databaseClient) existsRepositoryStargazer(repo, login string) (bool, error) {
+	return false, nil
+}
+
+func (c databaseClient) existsRepositoryOrganizationStargazer(repo, orga string) (bool, error) {
+	return false, nil
 }

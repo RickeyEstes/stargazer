@@ -8,11 +8,15 @@ type Common struct {
 
 type Crawler struct {
 	Common
-	Repositories               []string
 	GHToken                    string
 	MgoURI                     string
 	UserExpirationDelay        int64
 	UserExpirationMinFollowers int64
+	UserRefreshDelay           int64
+	MainRepository             string
+	MainRepositoryScanDelay    int64
+	TaskRepositoryScanDelay    int64
+	Database                   Database
 }
 
 type Database struct {

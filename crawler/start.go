@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/richardlt/stargazer/config"
+	"github.com/richardlt/stargazer/database"
 )
 
 func Start(cfg config.Crawler) error {
@@ -24,44 +25,66 @@ func Start(cfg config.Crawler) error {
 		return errors.WithStack(err)
 	}
 
-	db := client.Database("stargazer")
-	dbClient := &databaseClient{db}
-	if err := dbClient.init(); err != nil {
+	mgo := client.Database("stargazer")
+	mgoClient := &databaseClient{mgo}
+	if err := mgoClient.init(); err != nil {
 		return err
 	}
 
-	ghClient := &githubClient{cfg.GHToken}
-
-	rs := cfg.Repositories
-
-	for i := range rs {
-		go func(repo string) {
-			for {
-				if err := execStargazerRoutine(dbClient, ghClient, repo); err != nil {
-					logrus.Errorf("%+v", err)
-				}
-
-				logrus.Infof("main: waiting 30s for next repo %s update", repo)
-				time.Sleep(30 * time.Second)
-			}
-		}(rs[i])
+	pgClient, err := database.New(cfg.Database)
+	if err != nil {
+		return err
 	}
+	defer pgClient.Close()
+
+	ghClient := &githubClient{token: cfg.GHToken}
 
 	go func() {
+		logrus.Info("main: start main repository scanner")
 		for {
-			if err := execUserRoutine(dbClient, ghClient, cfg.UserExpirationDelay,
-				cfg.UserExpirationMinFollowers); err != nil {
+			if err := execStargazerRoutine(mgoClient, ghClient, cfg.MainRepository); err != nil {
 				logrus.Errorf("%+v", err)
 			}
-
-			logrus.Info("main: waiting 30s for next user update")
-			time.Sleep(30 * time.Second)
+			logrus.Infof("main: main repository scanner routine waiting %ds\n", cfg.MainRepositoryScanDelay)
+			time.Sleep(time.Duration(cfg.MainRepositoryScanDelay) * time.Second)
 		}
 	}()
 
-	date := time.Now()
+	go func() {
+		logrus.Info("main: start task repository scanner")
+		for {
+			if err := execTaskRepositoryRoutine(pgClient, mgoClient, ghClient, cfg.MainRepository); err != nil {
+				logrus.Errorf("%+v", err)
+			}
+			logrus.Infof("main: task repository scanner routine waiting %ds\n", cfg.TaskRepositoryScanDelay)
+			time.Sleep(time.Duration(cfg.TaskRepositoryScanDelay) * time.Second)
+		}
+	}()
+
+	go func() {
+		logrus.Info("main: start refresh user routine")
+		for {
+			if err := execUserRoutine(mgoClient, ghClient, cfg.UserExpirationDelay,
+				cfg.UserExpirationMinFollowers); err != nil {
+				logrus.Errorf("%+v", err)
+			}
+			logrus.Infof("main: refresh user routine waiting %ds\n", cfg.UserExpirationDelay)
+			time.Sleep(time.Duration(cfg.UserRefreshDelay) * time.Second)
+		}
+	}()
+
+	startDate := time.Now()
+	lastDate := startDate
 	for {
-		logrus.Infof("main: running since %s", time.Since(date).String())
+		now := time.Now()
+		logrus.Infof("main: now is %s running since %s", now.UTC().String(), now.Sub(startDate).String())
+		logrus.Infof("main: GH request count is %d for current hour", ghClient.getRequestCount())
+
+		// reset GH request count if hour changed
+		if now.Hour() != lastDate.Hour() {
+			ghClient.resetRequestCount()
+		}
+		lastDate = now
 		time.Sleep(time.Minute)
 	}
 }

@@ -1,8 +1,6 @@
 package crawler
 
 import (
-	"time"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,7 +47,7 @@ func execStargazerRoutine(dbClient *databaseClient, ghClient *githubClient, repo
 	// if counts are different then reload all stargazers
 	if change {
 		if repoExists {
-			logrus.Info("stargazer routine: update repository in database")
+			logrus.Info("stargazer routine: update repository %s in database", r.Path)
 			r.Data = o
 			if err := dbClient.updateRepository(r); err != nil {
 				return err
@@ -57,34 +55,27 @@ func execStargazerRoutine(dbClient *databaseClient, ghClient *githubClient, repo
 		}
 
 		logrus.Info("stargazer routine: load stargazers from Github")
-		expectedPageCount := (githubStargazersCount / 100) + 1
-		for page := 1; page <= expectedPageCount; page++ {
-			logrus.Infof("stargazer routine: load stargazers page %d/%d from Github", page, expectedPageCount)
-			os, err := ghClient.getRepositoryStargazer(r.Path, page)
-			if err != nil {
-				return err
-			}
 
-			logrus.Infof("stargazer routine: delete all stargazers for page %d in database", page)
-			if err := dbClient.deleteStargazers(r.ID, page); err != nil {
-				return err
-			}
+		os, err := ghClient.getRepositoryStargazer(r.Path)
+		if err != nil {
+			return err
+		}
 
-			ss := make([]stargazer, len(os))
-			for i := range os {
-				ss[i].RepositoryID = r.ID
-				ss[i].RepositoryPath = r.Path
-				ss[i].Page = page
-				ss[i].Data = os[i]
-			}
+		logrus.Infof("stargazer routine: delete all stargazers for repository %s in database", r.Path)
+		if err := dbClient.deleteStargazers(r.ID); err != nil {
+			return err
+		}
 
-			logrus.Infof("stargazer routine: insert stargazers for page %d in database", page)
-			if err := dbClient.insertStargazers(ss); err != nil {
-				return err
-			}
+		ss := make([]stargazer, len(os))
+		for i := range os {
+			ss[i].RepositoryID = r.ID
+			ss[i].RepositoryPath = r.Path
+			ss[i].Data = os[i]
+		}
 
-			logrus.Info("stargazer routine: wait 50ms")
-			time.Sleep(50 * time.Millisecond)
+		logrus.Infof("stargazer routine: insert %d stargazers for repository %s in database", len(ss), r.Path)
+		if err := dbClient.insertStargazers(ss); err != nil {
+			return err
 		}
 	}
 

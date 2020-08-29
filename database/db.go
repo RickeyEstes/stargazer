@@ -57,6 +57,15 @@ func (d *DB) Get(repo string) (*Entry, error) {
 	return &e, nil
 }
 
+func (d *DB) GetAllWithStatus(status Status) ([]Entry, error) {
+	var es []Entry
+	res := d.db.Find(&es, "status = ?", status)
+	if res.Error != nil {
+		return nil, errors.WithStack(res.Error)
+	}
+	return es, nil
+}
+
 func (d *DB) Create(e *Entry) error {
 	res := d.db.Create(e)
 	return errors.WithStack(res.Error)
