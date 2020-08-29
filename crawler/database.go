@@ -1,13 +1,13 @@
-package main
+package crawler
 
 import (
 	"context"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -84,7 +84,7 @@ func (c databaseClient) countStargazers(repositoryID primitive.ObjectID) (int, e
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	count, err := co.Count(ctx, bson.M{"_repository_id": repositoryID})
+	count, err := co.CountDocuments(ctx, bson.M{"_repository_id": repositoryID})
 	return int(count), errors.WithStack(err)
 }
 

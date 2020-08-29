@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
-	expirationDelay, expirationMinFollowers int) error {
+	expirationDelay, expirationMinFollowers int64) error {
 	logrus.Info("user routine: get stargazers from database")
 	ss, err := dbClient.getStargazers()
 	if err != nil {
@@ -23,7 +23,7 @@ func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
 		if err != nil {
 			return err
 		}
-		needSave := u == nil || (u.Expire.Before(time.Now()) && expirationDelay > 0 && int(u.Data["followers"].(float64)) >= expirationMinFollowers)
+		needSave := u == nil || (u.Expire.Before(time.Now()) && expirationDelay > 0 && int64(u.Data["followers"].(float64)) >= expirationMinFollowers)
 		if needSave {
 			logrus.Infof("user routine: get user %s from Github (%d/%d)", login, i+1, len(ss))
 			o, err := ghClient.getUser(login)

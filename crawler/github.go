@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
 	"encoding/json"
@@ -7,6 +7,10 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+)
+
+const (
+	ghBaseURL = "https://api.github.com"
 )
 
 type githubClient struct {
@@ -44,7 +48,7 @@ func (c githubClient) get(url string, modifiers ...func(req *http.Request)) ([]b
 func (c githubClient) getRepository(path string) (object, error) {
 	var o object
 
-	buf, err := c.get(fmt.Sprintf("%s/repos/%s", baseURL, path))
+	buf, err := c.get(fmt.Sprintf("%s/repos/%s", ghBaseURL, path))
 	if err != nil {
 		return o, err
 	}
@@ -58,7 +62,7 @@ func (c githubClient) getRepository(path string) (object, error) {
 
 func (c githubClient) getRepositoryStargazer(path string, page int) ([]object, error) {
 	buf, err := c.get(
-		fmt.Sprintf("%s/repos/%s/stargazers?page=%d&per_page=100", baseURL, path, page),
+		fmt.Sprintf("%s/repos/%s/stargazers?page=%d&per_page=100", ghBaseURL, path, page),
 		func(req *http.Request) { req.Header.Add("Accept", "application/vnd.github.v3.star+json") },
 	)
 	if err != nil {
@@ -76,7 +80,7 @@ func (c githubClient) getRepositoryStargazer(path string, page int) ([]object, e
 func (c githubClient) getUser(login string) (object, error) {
 	var o object
 
-	buf, err := c.get(fmt.Sprintf("%s/users/%s", baseURL, login))
+	buf, err := c.get(fmt.Sprintf("%s/users/%s", ghBaseURL, login))
 	if err != nil {
 		return o, err
 	}
