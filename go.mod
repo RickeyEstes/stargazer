@@ -1,5 +1,7 @@
 module github.com/richardlt/stargazer
 
+go 1.14
+
 require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
