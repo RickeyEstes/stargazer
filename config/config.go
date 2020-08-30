@@ -8,15 +8,16 @@ type Common struct {
 
 type Crawler struct {
 	Common
-	GHToken                    string
-	MgoURI                     string
-	UserExpirationDelay        int64
-	UserExpirationMinFollowers int64
-	UserRefreshDelay           int64
-	MainRepository             string
-	MainRepositoryScanDelay    int64
-	TaskRepositoryScanDelay    int64
-	Database                   Database
+	GHToken                         string
+	MgoURI                          string
+	UserExpirationDelay             int64
+	UserExpirationMinFollowers      int64
+	UserRefreshDelay                int64
+	MainRepository                  string
+	MainRepositoryScanDelay         int64
+	TaskRepositoryScanDelay         int64
+	TaskRepositoryMaxStargazerPages int64
+	Database                        Database
 }
 
 type Database struct {

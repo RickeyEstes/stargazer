@@ -18,6 +18,8 @@ type stargazer struct {
 	ID             primitive.ObjectID `bson:"_id" json:"-"`
 	RepositoryID   primitive.ObjectID `bson:"_repository_id" json:"-"`
 	RepositoryPath string             `bson:"repository_path" json:"-"`
+	Page           int64              `bson:"page" json:"page"`
+	LastPage       bool               `bson:"last_page" json:"last_page"`
 	Data           object             `bson:"data" json:"data"`
 }
 
@@ -27,4 +29,10 @@ type user struct {
 	Login         string             `bson:"login" json:"login"`
 	Data          object             `bson:"data" json:"data"`
 	Organizations []object           `bson:"organizations" json:"organizations"`
+}
+
+type measure struct {
+	Date  time.Time `bson:"date"`
+	Page  int64     `bson:"page"`
+	Count int64     `bson:"count"`
 }

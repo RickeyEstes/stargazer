@@ -78,7 +78,7 @@ func main() {
 				},
 				cli.IntFlag{
 					Name:  "user-refresh-delay",
-					Value: 60,
+					Value: 30,
 					Usage: "Set the delay for refresh users in seconds.",
 				},
 				cli.StringFlag{
@@ -88,13 +88,18 @@ func main() {
 				},
 				cli.IntFlag{
 					Name:  "main-repository-scan-delay",
-					Value: 60,
+					Value: 30,
 					Usage: "Set the delay for main repository scanner in seconds.",
 				},
 				cli.IntFlag{
 					Name:  "task-repository-scan-delay",
-					Value: 60,
+					Value: 30,
 					Usage: "Set the delay for task repository scanner in seconds.",
+				},
+				cli.IntFlag{
+					Name:  "task-repository-max-stargazer-pages",
+					Value: 100,
+					Usage: "Set the maximum stargazer pages to load for a repository.",
 				},
 			),
 			Action: func(c *cli.Context) error {
@@ -107,14 +112,15 @@ func main() {
 					Common: config.Common{
 						LogLevel: level,
 					},
-					MgoURI:                     c.String("mongo-uri"),
-					GHToken:                    c.String("token"),
-					UserExpirationDelay:        c.Int64("user-expiration-delay"),
-					UserExpirationMinFollowers: c.Int64("user-expiration-min-followers"),
-					UserRefreshDelay:           c.Int64("user-refresh-delay"),
-					MainRepository:             c.String("main-repository"),
-					MainRepositoryScanDelay:    c.Int64("main-repository-scan-delay"),
-					TaskRepositoryScanDelay:    c.Int64("task-repository-scan-delay"),
+					MgoURI:                          c.String("mongo-uri"),
+					GHToken:                         c.String("token"),
+					UserExpirationDelay:             c.Int64("user-expiration-delay"),
+					UserExpirationMinFollowers:      c.Int64("user-expiration-min-followers"),
+					UserRefreshDelay:                c.Int64("user-refresh-delay"),
+					MainRepository:                  c.String("main-repository"),
+					MainRepositoryScanDelay:         c.Int64("main-repository-scan-delay"),
+					TaskRepositoryScanDelay:         c.Int64("task-repository-scan-delay"),
+					TaskRepositoryMaxStargazerPages: c.Int64("task-repository-max-stargazer-pages"),
 					Database: config.Database{
 						Host:     c.String("db-host"),
 						Port:     c.Int64("db-port"),

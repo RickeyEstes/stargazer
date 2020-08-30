@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"time"
@@ -8,8 +9,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"github.com/richardlt/stargazer/database"
 	"github.com/sirupsen/logrus"
+
+	"github.com/richardlt/stargazer/database"
 )
 
 func (s *Server) notFoundPageHandler(t *template.Template) http.HandlerFunc {
@@ -62,7 +64,17 @@ func (s *Server) repositoryPageHandler(t *template.Template) http.HandlerFunc {
 			logrus.Debugf("Entry updated for repository: %s", repoPath)
 		}
 
-		if err := t.ExecuteTemplate(w, "repository", *e); err != nil {
+		buf, err := json.Marshal(e.Stats)
+		if err != nil {
+			logrus.Errorf("%+v", errors.WithStack(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err := t.ExecuteTemplate(w, "repository", map[string]interface{}{
+			"entry":      *e,
+			"stats_json": string(buf),
+		}); err != nil {
 			logrus.Errorf("%+v", errors.WithStack(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return

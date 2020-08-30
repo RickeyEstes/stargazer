@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -55,13 +54,13 @@ func (c *githubClient) get(url string, modifiers ...func(req *http.Request)) ([]
 		return nil, errors.WithStack(err)
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("error request at %s", url))
-	}
-
 	buf, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("error request at %s with code %d: body=%s", url, res.StatusCode, string(buf)))
 	}
 
 	return buf, nil
@@ -89,7 +88,6 @@ func (c *githubClient) getPaginate(url string, modifiers ...func(req *http.Reque
 			break
 		}
 		page++
-		time.Sleep(10 * time.Millisecond)
 	}
 
 	return res, nil
@@ -118,6 +116,23 @@ func (c *githubClient) getRepositoryStargazer(path string) ([]object, error) {
 	if err != nil {
 		return nil, err
 	}
+	return os, nil
+}
+
+func (c *githubClient) getRepositoryStargazerPage(path string, page int64) ([]object, error) {
+	buf, err := c.get(
+		fmt.Sprintf("%s/repos/%s/stargazers?page=%d&per_page=100", ghBaseURL, path, page),
+		func(req *http.Request) { req.Header.Add("Accept", "application/vnd.github.v3.star+json") },
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var os []object
+	if err := json.Unmarshal(buf, &os); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	return os, nil
 }
 

@@ -42,7 +42,7 @@ func Start(cfg config.Crawler) error {
 	go func() {
 		logrus.Info("main: start main repository scanner")
 		for {
-			if err := execStargazerRoutine(mgoClient, ghClient, cfg.MainRepository); err != nil {
+			if err := execMainRepositoryRoutine(mgoClient, ghClient, cfg.MainRepository); err != nil {
 				logrus.Errorf("%+v", err)
 			}
 			logrus.Infof("main: main repository scanner routine waiting %ds\n", cfg.MainRepositoryScanDelay)
@@ -53,7 +53,7 @@ func Start(cfg config.Crawler) error {
 	go func() {
 		logrus.Info("main: start task repository scanner")
 		for {
-			if err := execTaskRepositoryRoutine(pgClient, mgoClient, ghClient, cfg.MainRepository); err != nil {
+			if err := execTaskRepositoryRoutine(pgClient, mgoClient, ghClient, cfg.MainRepository, cfg.TaskRepositoryMaxStargazerPages, cfg.MainRepository); err != nil {
 				logrus.Errorf("%+v", err)
 			}
 			logrus.Infof("main: task repository scanner routine waiting %ds\n", cfg.TaskRepositoryScanDelay)
@@ -64,8 +64,7 @@ func Start(cfg config.Crawler) error {
 	go func() {
 		logrus.Info("main: start refresh user routine")
 		for {
-			if err := execUserRoutine(mgoClient, ghClient, cfg.UserExpirationDelay,
-				cfg.UserExpirationMinFollowers); err != nil {
+			if err := execUserRoutine(mgoClient, ghClient, cfg.UserExpirationDelay, cfg.UserExpirationMinFollowers, cfg.MainRepository); err != nil {
 				logrus.Errorf("%+v", err)
 			}
 			logrus.Infof("main: refresh user routine waiting %ds\n", cfg.UserExpirationDelay)

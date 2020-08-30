@@ -6,8 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
-	expirationDelay, expirationMinFollowers int64) error {
+func execUserRoutine(dbClient *databaseClient, ghClient *githubClient, expirationDelay, expirationMinFollowers int64, mainRepoPath string) error {
 	logrus.Info("user routine: get stargazers from database")
 	ss, err := dbClient.getStargazers()
 	if err != nil {
@@ -16,6 +15,10 @@ func execUserRoutine(dbClient *databaseClient, ghClient *githubClient,
 
 	logrus.Infof("user routine: iterate over %d stargazers", len(ss))
 	for i := range ss {
+		// Load only user for last stargazer page or load all for main repo
+		if !ss[i].LastPage && ss[i].RepositoryPath != mainRepoPath {
+			continue
+		}
 		rawUser := ss[i].Data["user"].(object)
 		login := rawUser["login"].(string)
 
