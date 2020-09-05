@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/richardlt/stargazer/database"
+	"github.com/paper2code-bot/stargazer/database"
 )
 
 func execMainRepositoryRoutine(dbClient *databaseClient, ghClient *githubClient, repo string) error {

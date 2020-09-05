@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/richardlt/stargazer/config"
-	"github.com/richardlt/stargazer/database"
+	"github.com/paper2code-bot/stargazer/config"
+	"github.com/paper2code-bot/stargazer/database"
 )
 
 func Start(cfg config.Crawler) error {

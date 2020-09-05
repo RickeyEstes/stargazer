@@ -7,9 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/richardlt/stargazer/config"
-	"github.com/richardlt/stargazer/crawler"
-	"github.com/richardlt/stargazer/web"
+	"github.com/paper2code-bot/stargazer/config"
+	"github.com/paper2code-bot/stargazer/crawler"
+	"github.com/paper2code-bot/stargazer/web"
 )
 
 func main() {
@@ -88,7 +88,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:  "main-repository",
-					Value: "richardlt/stargazer",
+					Value: "paper2code-bot/stargazer",
 					Usage: "Set the path for main repository.",
 				},
 				cli.IntFlag{

@@ -10,7 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 
-	"github.com/richardlt/stargazer/config"
+	"github.com/paper2code-bot/stargazer/config"
 )
 
 func New(cfg config.Database) (*DB, error) {

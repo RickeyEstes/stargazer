@@ -3,8 +3,8 @@ package web
 import (
 	"github.com/sirupsen/logrus"
 
-	"github.com/richardlt/stargazer/config"
-	"github.com/richardlt/stargazer/database"
+	"github.com/paper2code-bot/stargazer/config"
+	"github.com/paper2code-bot/stargazer/database"
 )
 
 func Start(cfg config.Web) error {

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/richardlt/stargazer/database"
+	"github.com/paper2code-bot/stargazer/database"
 )
 
 func newTestServer(t *testing.T) (*mux.Router, *database.DB) {
@@ -31,16 +31,16 @@ func Test_repositoryPageHandler_firstRequest(t *testing.T) {
 
 	r, db := newTestServer(t)
 
-	require.NoError(t, db.Delete("richardlt/stargazer"))
+	require.NoError(t, db.Delete("paper2code-bot/stargazer"))
 
-	req, err := http.NewRequest("GET", "/richardlt/stargazer", nil)
+	req, err := http.NewRequest("GET", "/paper2code-bot/stargazer", nil)
 	require.NoError(t, err)
 	rec := httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
 
-	entry, err := db.Get("richardlt/stargazer")
+	entry, err := db.Get("paper2code-bot/stargazer")
 	require.NoError(t, err)
 
 	assert.Equal(t, database.StatusRequested, entry.Status)
@@ -50,9 +50,9 @@ func Test_repositoryPageHandler_firstRequest(t *testing.T) {
 func Test_repositoryPageHandler_secondRequest(t *testing.T) {
 	r, db := newTestServer(t)
 
-	require.NoError(t, db.Delete("richardlt/stargazer"))
+	require.NoError(t, db.Delete("paper2code-bot/stargazer"))
 	existingEntry := database.Entry{
-		Repository: "richardlt/stargazer",
+		Repository: "paper2code-bot/stargazer",
 		Status:     database.StatusGenerated,
 	}
 	require.NoError(t, db.Create(&existingEntry))
@@ -60,14 +60,14 @@ func Test_repositoryPageHandler_secondRequest(t *testing.T) {
 
 	time.Sleep(time.Millisecond * 50)
 
-	req, err := http.NewRequest("GET", "/richardlt/stargazer", nil)
+	req, err := http.NewRequest("GET", "/paper2code-bot/stargazer", nil)
 	require.NoError(t, err)
 	rec := httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
 
-	entry, err := db.Get("richardlt/stargazer")
+	entry, err := db.Get("paper2code-bot/stargazer")
 	require.NoError(t, err)
 
 	assert.Equal(t, database.StatusGenerated, entry.Status)

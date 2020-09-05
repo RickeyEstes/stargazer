@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/richardlt/stargazer/database"
+	"github.com/paper2code-bot/stargazer/database"
 )
 
 func (s *Server) notFoundPageHandler(t *template.Template) http.HandlerFunc {
