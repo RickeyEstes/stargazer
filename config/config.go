@@ -27,6 +27,7 @@ type Database struct {
 	Name     string
 	User     string
 	Password string
+	Driver   string
 }
 
 type Web struct {

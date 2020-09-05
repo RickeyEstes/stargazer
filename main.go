@@ -19,31 +19,36 @@ func main() {
 		cli.StringFlag{
 			Name:  "db-host",
 			Value: "localhost",
-			Usage: "Postgres database URI",
+			Usage: "Database URI",
 		},
 		cli.Int64Flag{
 			Name:  "db-port",
-			Value: 5432,
-			Usage: "Postgres database port",
+			Value: 3306,
+			Usage: "Database port",
 		},
 		cli.BoolFlag{
 			Name:  "db-ssl",
-			Usage: "Postgres database ssl mode",
+			Usage: "Database ssl mode",
 		},
 		cli.StringFlag{
 			Name:  "db-name",
 			Value: "stargazer",
-			Usage: "Postgres database name",
+			Usage: "Database name",
 		},
 		cli.StringFlag{
 			Name:  "db-user",
 			Value: "stargazer",
-			Usage: "Postgres database user",
+			Usage: "Database user",
 		},
 		cli.StringFlag{
 			Name:  "db-pass",
 			Value: "stargazer",
-			Usage: "Postgres database password",
+			Usage: "Database password",
+		},
+		cli.StringFlag{
+			Name:  "db-driver",
+			Value: "mysql",
+			Usage: "Database driver",
 		},
 		cli.StringFlag{
 			Name:  "log-level",
@@ -128,6 +133,7 @@ func main() {
 						Name:     c.String("db-name"),
 						User:     c.String("db-user"),
 						Password: c.String("db-pass"),
+						Driver:   c.String("db-driver"),
 					},
 				})
 			},

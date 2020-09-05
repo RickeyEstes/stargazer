@@ -1,6 +1,6 @@
-module github.com/richardlt/stargazer
+module github.com/paper2code-bot/stargazer
 
-go 1.14
+go 1.15
 
 require (
 	github.com/gorilla/mux v1.8.0

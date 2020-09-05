@@ -2,6 +2,17 @@
 version: '3.8'
 services:
 
+  stargazer:
+    image: x0rzkov/stargazer:latest
+    build:
+      context: .
+      dockerfile: Dockerfile   
+    container_name: ${NAMESPACE}-stargazer
+    networks:
+    - internal
+    - web
+    command: ["stargazer","web"]
+
   mysql:
     image: x0rzkov/mysql-multi:5-ubuntu
     build:
@@ -9,18 +20,30 @@ services:
       dockerfile: Dockerfile
     container_name: ${NAMESPACE}-multidb
     ports:
-    - 3308:3306
+    - 3309:3306
     volumes:
     - db-data:/var/lib/mysql
     networks:
     - internal
     - web
     environment:
-      MYSQL_MULTIPLE_DATABASES: stargazers
+      MYSQL_MULTIPLE_DATABASES: stargazer
       MYSQL_PASSWORD: ${STARGAZER_MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${STARGAZER_MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${STARGAZER_MYSQL_USER}
     restart: unless-stopped
+
+  mongodb:
+    image: mongo:latest
+    container_name: ${NAMESPACE}-mongodb
+    volumes:
+    - mongo-data:/var/lib/mongodb/db
+    - mongo-backup:/var/lib/backup
+    ports:
+    - 27017:27017
+    networks:
+    - internal
+    command: mongod --replSet mongodb0 --smallfiles
 
 networks:
   internal:
@@ -30,3 +53,5 @@ networks:
 
 volumes:
   db-data:
+  mongo-data:
+  mongo-backup:

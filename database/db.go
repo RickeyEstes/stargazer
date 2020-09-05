@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 
 	"github.com/richardlt/stargazer/config"
@@ -14,18 +15,28 @@ import (
 
 func New(cfg config.Database) (*DB, error) {
 
-	opts := []string{
-		"host=" + cfg.Host,
-		fmt.Sprintf("port=%d", cfg.Port),
-		"dbname=" + cfg.Name,
-		"user=" + cfg.User,
-		"password=" + cfg.Password,
-	}
-	if !cfg.SSL {
-		opts = append(opts, "sslmode=disable")
+	var dsn string
+	switch cfg.Driver {
+	// case "postgres":
+	// 	opts = []string{
+	// 		"host=" + cfg.Host,
+	// 		fmt.Sprintf("port=%d", cfg.Port),
+	// 		"dbname=" + cfg.Name,
+	// 		"user=" + cfg.User,
+	// 		"password=" + cfg.Password,
+	// 	}
+	// 	if !cfg.SSL {
+	// 		opts = append(opts, "sslmode=disable")
+	// 	}
+	case "mysql":
+		dsn = fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8mb4,utf8&parseTime=True", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
+	case "sqlite":
+		fallthrough
+	default:
+		dsn = fmt.Sprintf("%s.db", cfg.Name)
 	}
 
-	db, err := gorm.Open("postgres", strings.Join(opts, " "))
+	db, err := gorm.Open(cfg.Driver, dsn) // strings.Join(opts, " "))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
